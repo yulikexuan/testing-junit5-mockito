@@ -11,6 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -100,4 +103,24 @@ class SpecialitySDJpaServiceTest {
 		// When
 		this.specialitySDJpaService.delete(new Speciality());
 	}
-}
+
+	@DisplayName("Able to find a Speciality by it's id - ")
+	@Test
+	void testFindById() {
+
+		// Given
+		long id = 1L;
+		Speciality speciality = mock(Speciality.class);
+
+		when(this.specialtyRepository.findById(id))
+				.thenReturn(Optional.of(speciality));
+
+		// When
+		Speciality actualSpeciality = this.specialitySDJpaService.findById(id);
+
+		// Then
+		assertThat(actualSpeciality).isSameAs(speciality);
+		verify(this.specialtyRepository).findById(id);
+	}
+
+}///:~
