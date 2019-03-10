@@ -1,4 +1,4 @@
-//: guru.springframework.AnnotationMocksTest.java
+//: guru.springframework.JUnitExtensionTest.java
 
 
 package guru.springframework;
@@ -7,24 +7,25 @@ package guru.springframework;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
 
 
-@DisplayName("Verify Mockito Annotations - ")
-public class AnnotationMocksTest {
+@DisplayName("Extend with MockitoExtension - ")
+@ExtendWith(MockitoExtension.class)
+public class JUnitExtensionTest {
 
 	@Mock
 	private Map<String, Object> mapMock;
 
 	@BeforeEach
 	void setUp() {
-		MockitoAnnotations.initMocks(this);
 	}
 
-	@DisplayName("Verify using MockitoAnnotation to initialize mocks - ")
+	@DisplayName("Verify using MockitoExtension to initialize mocks - ")
 	@Test
 	void testMock() {
 		// Given
