@@ -15,6 +15,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 
@@ -46,10 +48,10 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.deleteById(1L);
 
 		// Then
-		verify(this.specialtyRepository, times(2))
+		then(this.specialtyRepository).should(times(2))
 				.deleteById(id);
-		verify(this.specialtyRepository, atLeastOnce()).deleteById(id);
-		verify(this.specialtyRepository, atMost(5))
+		then(this.specialtyRepository).should(atLeastOnce()).deleteById(id);
+		then(this.specialtyRepository).should(atMost(5))
 				.deleteById(id);
 	}
 
@@ -65,7 +67,7 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.deleteById(1L);
 
 		// Then
-		verify(this.specialtyRepository, atLeastOnce()).deleteById(eq(id));
+		then(this.specialtyRepository).should(atLeastOnce()).deleteById(eq(id));
 	}
 
 	@DisplayName("Should be able to delete by id at most five times -")
@@ -80,7 +82,7 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.deleteById(1L);
 
 		// Then
-		verify(this.specialtyRepository, atMost(5))
+		then(this.specialtyRepository).should(atMost(5))
 				.deleteById(eq(id));
 	}
 
@@ -96,7 +98,7 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.deleteById(1L);
 
 		// Then
-		verify(this.specialtyRepository, never())
+		then(this.specialtyRepository).should(never())
 				.deleteById(eq(5L));
 	}
 
@@ -105,24 +107,6 @@ class SpecialitySDJpaServiceTest {
 	void delete() {
 		// When
 		this.specialitySDJpaService.delete(new Speciality());
-	}
-
-	@DisplayName("Able to find a Speciality by it's id - ")
-	@Test
-	void testFindById() {
-
-		// Given
-		long id = 1L;
-
-		when(this.specialtyRepository.findById(id))
-				.thenReturn(Optional.of(speciality));
-
-		// When
-		Speciality actualSpeciality = this.specialitySDJpaService.findById(id);
-
-		// Then
-		assertThat(actualSpeciality).isSameAs(speciality);
-		verify(this.specialtyRepository).findById(eq(id));
 	}
 
 	@DisplayName("Able to delete a Speciality - ")
@@ -135,7 +119,45 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.delete(this.speciality);
 
 		// Then
-		verify(this.specialtyRepository).delete(same(this.speciality));
+		then(this.specialtyRepository).should().delete(same(this.speciality));
+	}
+
+	@DisplayName("Able to find a Speciality by it's id - ")
+	@Test
+	void testFindById() {
+
+		// Given
+		long id = 1L;
+
+		given(this.specialtyRepository.findById(id))
+				.willReturn(Optional.of(speciality));
+
+		// When
+		Speciality actualSpeciality = this.specialitySDJpaService.findById(id);
+
+		// Then
+		assertThat(actualSpeciality).isSameAs(speciality);
+		then(this.specialtyRepository).should().findById(eq(id));
+	}
+
+	@DisplayName("BDD: Able to find a Speciality by it's id - ")
+	@Test
+	void testBDDFindById() {
+
+		// Given
+		long id = 1L;
+
+		given(this.specialtyRepository.findById(id))
+				.willReturn(Optional.of(this.speciality));
+
+		// When
+		Speciality actualSpeciality = this.specialitySDJpaService.findById(id);
+
+		// Then
+		assertThat(actualSpeciality).isSameAs(speciality);
+		then(this.specialtyRepository).should(times(1))
+				.findById(id);
+		then(this.specialtyRepository).shouldHaveNoMoreInteractions();
 	}
 
 }///:~
