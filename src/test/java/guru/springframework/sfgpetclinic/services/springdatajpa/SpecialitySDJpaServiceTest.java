@@ -14,9 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -25,7 +23,7 @@ class SpecialitySDJpaServiceTest {
 	@Mock
 	private Speciality speciality;
 
-	@Mock
+	@Mock(lenient = true)
 	private SpecialtyRepository specialtyRepository;
 
 	@InjectMocks
@@ -195,6 +193,56 @@ class SpecialitySDJpaServiceTest {
 		then(this.specialtyRepository)
 				.should(times(1))
 				.delete(same(this.speciality));
+	}
+	
+	@DisplayName("Verify mock return value with Lambda Arg Matcher - ")
+	@Test
+	void testSaveLambdaMatch() {
+		
+		// Given
+		final String matchMe = "Match_Me";
+		Speciality speciality = new Speciality();
+		speciality.setDescription(matchMe);
+		
+		Speciality savedSpeciality = new Speciality();
+		savedSpeciality.setId(1L);
+		
+		given(this.specialtyRepository
+				.save(argThat(arg -> arg.getDescription().equals(matchMe))))
+				.willReturn(savedSpeciality);
+		
+		// When
+		Speciality actualSpeciality = this.specialitySDJpaService.save(speciality);
+		
+		// Then
+		assertThat(actualSpeciality.getId()).isEqualTo(1L);
+
+		then(this.specialtyRepository).should(times(1)).save(same(speciality));
+	}
+	
+	@DisplayName("Verify mock return null with Lambda Arg Matcher - ")
+	@Test
+	void testSaveLambdaNoMatch() {
+		
+		// Given
+		final String matchMe = "Match_Me";
+		Speciality speciality = new Speciality();
+		speciality.setDescription("Not a match");
+		
+		Speciality savedSpeciality = new Speciality();
+		savedSpeciality.setId(1L);
+
+		willReturn(savedSpeciality)
+				.given(this.specialtyRepository)
+				.save(argThat(arg -> arg.getDescription().equals(matchMe)));
+		
+		// When
+		Speciality actualSpeciality = this.specialitySDJpaService.save(speciality);
+		
+		// Then
+		assertThat(actualSpeciality).isNull();
+
+		then(this.specialtyRepository).should().save(same(speciality));
 	}
 	
 }///:~
