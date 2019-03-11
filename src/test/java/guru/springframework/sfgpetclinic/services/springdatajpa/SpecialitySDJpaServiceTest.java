@@ -13,10 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
 
@@ -159,5 +158,43 @@ class SpecialitySDJpaServiceTest {
 				.findById(id);
 		then(this.specialtyRepository).shouldHaveNoMoreInteractions();
 	}
+	
 
+	@DisplayName("findById can throw Exception - ")
+	@Test
+	void testDoThrowFromFindById() {
+
+		// Given
+		given(this.specialtyRepository.findById(1L))
+				.willThrow(new RuntimeException("Boom"));
+		
+		// When
+		assertThatThrownBy(() -> specialitySDJpaService.findById(1L))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessage("Boom");
+		
+		// Then
+		then(this.specialtyRepository).should(times(1)).findById(eq(1L));
+	}
+	
+	@DisplayName("Void return type method can throw Exception - ")
+	@Test
+	void testDoThrowFromDelete() {
+
+		// Given
+		willThrow(new RuntimeException("Boom"))
+				.given(this.specialtyRepository)
+				.delete(this.speciality);
+		
+		// When
+		assertThatThrownBy(() -> specialitySDJpaService.delete(this.speciality))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessage("Boom");
+		
+		// Then
+		then(this.specialtyRepository)
+				.should(times(1))
+				.delete(same(this.speciality));
+	}
+	
 }///:~

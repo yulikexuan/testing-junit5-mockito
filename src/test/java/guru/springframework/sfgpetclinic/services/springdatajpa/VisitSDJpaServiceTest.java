@@ -105,16 +105,5 @@ class VisitSDJpaServiceTest {
 		}
 
 	}//: End of FindByIdTest class
-
-	@Test
-	void save() {
-	}
-
-	@Test
-	void delete() {
-	}
-
-	@Test
-	void deleteById() {
-	}
+	
 }
