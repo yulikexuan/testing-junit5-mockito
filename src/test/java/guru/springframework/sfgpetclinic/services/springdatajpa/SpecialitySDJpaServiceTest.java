@@ -22,6 +22,9 @@ import static org.mockito.Mockito.*;
 class SpecialitySDJpaServiceTest {
 
 	@Mock
+	private Speciality speciality;
+
+	@Mock
 	private SpecialtyRepository specialtyRepository;
 
 	@InjectMocks
@@ -62,7 +65,7 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.deleteById(1L);
 
 		// Then
-		verify(this.specialtyRepository, atLeastOnce()).deleteById(id);
+		verify(this.specialtyRepository, atLeastOnce()).deleteById(eq(id));
 	}
 
 	@DisplayName("Should be able to delete by id at most five times -")
@@ -78,7 +81,7 @@ class SpecialitySDJpaServiceTest {
 
 		// Then
 		verify(this.specialtyRepository, atMost(5))
-				.deleteById(id);
+				.deleteById(eq(id));
 	}
 
 	@DisplayName("Never delete by id 5 -")
@@ -94,7 +97,7 @@ class SpecialitySDJpaServiceTest {
 
 		// Then
 		verify(this.specialtyRepository, never())
-				.deleteById(5L);
+				.deleteById(eq(5L));
 	}
 
 	@DisplayName("Verify injected field when delete speciality -")
@@ -110,7 +113,6 @@ class SpecialitySDJpaServiceTest {
 
 		// Given
 		long id = 1L;
-		Speciality speciality = mock(Speciality.class);
 
 		when(this.specialtyRepository.findById(id))
 				.thenReturn(Optional.of(speciality));
@@ -120,7 +122,20 @@ class SpecialitySDJpaServiceTest {
 
 		// Then
 		assertThat(actualSpeciality).isSameAs(speciality);
-		verify(this.specialtyRepository).findById(id);
+		verify(this.specialtyRepository).findById(eq(id));
+	}
+
+	@DisplayName("Able to delete a Speciality - ")
+	@Test
+	void testDeleteByObject() {
+
+		// Given
+
+		// When
+		this.specialitySDJpaService.delete(this.speciality);
+
+		// Then
+		verify(this.specialtyRepository).delete(same(this.speciality));
 	}
 
 }///:~
