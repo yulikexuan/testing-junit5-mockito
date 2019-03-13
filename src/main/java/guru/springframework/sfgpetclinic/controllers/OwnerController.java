@@ -1,5 +1,6 @@
 package guru.springframework.sfgpetclinic.controllers;
 
+
 import guru.springframework.sfgpetclinic.fauxspring.BindingResult;
 import guru.springframework.sfgpetclinic.fauxspring.Model;
 import guru.springframework.sfgpetclinic.fauxspring.ModelAndView;
@@ -38,7 +39,8 @@ public class OwnerController {
         }
 
         // find owners by last name
-        List<Owner> results = ownerService.findAllByLastNameLike("%"+ owner.getLastName() + "%");
+        List<Owner> results = ownerService.findAllByLastNameLike(
+        		"%"+ owner.getLastName() + "%");
 
         if (results.isEmpty()) {
             // no owners found

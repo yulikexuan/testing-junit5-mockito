@@ -7,12 +7,16 @@ package guru.springframework.sfgpetclinic.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -20,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import guru.springframework.sfgpetclinic.fauxspring.BindingResult;
+import guru.springframework.sfgpetclinic.fauxspring.Model;
 import guru.springframework.sfgpetclinic.model.Owner;
 import guru.springframework.sfgpetclinic.services.OwnerService;
 
@@ -56,6 +61,55 @@ class OwnerControllerTest {
 		this.firstName = "Bill";
 		this.lastName = "Gates";
 		this.owner = new Owner(this.id, this.firstName, this.lastName);
+	}
+	
+	static Stream<Arguments> getOwnerArguments() {
+		return Stream.of(
+				Arguments.of(new Owner(1L, "Bill", "Gates"), "redirect:/owners/1"), 
+				Arguments.of(new Owner(2L, "Jack", "Lee"), "owners/ownersList"), 
+				Arguments.of(new Owner(3L, "Nobody", "Nobody"), "owners/findOwners"));
+	}
+	
+	@DisplayName("Able to process Find Form - ")
+	@ParameterizedTest(name = "{displayName} [{index}] {arguments}")
+	@MethodSource("getOwnerArguments")
+	void testProcessFindForm(final Owner ownerArg, final String expectedViewName) {
+		
+		// Given
+		final String criteria = "%" + ownerArg.getLastName() + "%";
+		
+		given(ownerService.findAllByLastNameLike(nameCriteriaCaptor.capture()))
+				.willAnswer(invocation -> {
+					List<Owner> ownerList = new ArrayList<>();
+					String criteriaArg = invocation.getArgument(0);
+					if (criteriaArg.equals("%Nobody%")) {
+						return ownerList;
+					} else if (criteriaArg.equals("%Gates%")) {
+						ownerList.add(ownerArg);
+						return ownerList;
+					} else if (criteriaArg.equals("%Lee%")) {
+						ownerList.add(ownerArg);
+						ownerList.add(new Owner(2L, "Eric", "Lee"));
+						return ownerList;
+					}
+					throw new RuntimeException(String.format(
+							"Invalid argument: '%s'", criteriaArg));
+				});
+		
+		Model model = mock(Model.class);
+		
+		// When
+		String actualViewName = controller.processFindForm(
+				ownerArg, bindingResult, model);
+		
+		// Then
+		then(ownerService).should(times(1)).findAllByLastNameLike(eq(criteria));
+		assertThat(nameCriteriaCaptor.getValue())
+				.as("The criteria of findAllByLastNameLike should be '%s'", criteria)
+				.isEqualTo(criteria);
+		assertThat(actualViewName)
+				.as("The view name should be '%s'", expectedViewName)
+				.isEqualTo(expectedViewName);
 	}
 
 	@DisplayName("Test the creation form process - ")
@@ -100,75 +154,5 @@ class OwnerControllerTest {
 		}
 		
 	}//:End of CreationFormProcessTest
-	
-	@Nested
-	@DisplayName("Test Find-Form Process - ")
-	class FindFormProcessTest {
-	
-		@DisplayName("Verify criteria of findAllByLastNameLike with inline Captor - ")
-		@Test
-		void testProcessFindFormWildcardStringWithInlineArgumentCaptor() {
-			
-			// Given
-			List<Owner> owners = new ArrayList<>();
-			owners.add(owner);
-			
-			String criteria = "%" + lastName + "%";
-			
-			final ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(
-					String.class);
-			
-			given(ownerService.findAllByLastNameLike(nameCaptor.capture()))
-					.willReturn(owners);
-			
-			String expectedViewName = "redirect:/owners/" + id;
-			
-			// When
-			String actualViewName = controller.processFindForm(owner, 
-					bindingResult, null);
-			
-			
-			// Then
-			then(ownerService).should(times(1)).findAllByLastNameLike(eq(criteria));
-			assertThat(nameCaptor.getValue())
-					.as("The criteria of findAllByLastNameLike should be '%s'", 
-							criteria)
-					.isEqualTo(criteria);
-			assertThat(actualViewName)
-					.as("The view name should be '%s'", expectedViewName)
-					.isEqualTo(expectedViewName);
-		}
 		
-		@DisplayName("Verify criteria of findAllByLastNameLike with Captor Annotation - ")
-		@Test
-		void testProcessFindFormWildcardStringWithArgumentCaptorAnnotation() {
-			
-			// Given
-			List<Owner> owners = new ArrayList<>();
-			owners.add(owner);
-			
-			String criteria = "%" + lastName + "%";
-			
-			given(ownerService.findAllByLastNameLike(nameCriteriaCaptor.capture()))
-					.willReturn(owners);
-			
-			String expectedViewName = "redirect:/owners/" + id;
-			
-			// When
-			String actualViewName = controller.processFindForm(owner, 
-					bindingResult, null);
-			
-			// Then
-			then(ownerService).should(times(1)).findAllByLastNameLike(eq(criteria));
-			assertThat(nameCriteriaCaptor.getValue())
-					.as("The criteria of findAllByLastNameLike should be '%s'", 
-							criteria)
-					.isEqualTo(criteria);
-			assertThat(actualViewName)
-					.as("The view name should be '%s'", expectedViewName)
-					.isEqualTo(expectedViewName);
-		}
-		
-	}//: End of FindFormProcessTest
-	
 }///:~
