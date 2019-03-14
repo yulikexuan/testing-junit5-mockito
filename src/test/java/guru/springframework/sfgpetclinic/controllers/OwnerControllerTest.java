@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -43,6 +44,9 @@ class OwnerControllerTest {
 	
 	@Mock
 	private BindingResult bindingResult;
+	
+	@Mock
+	private Model model;
 	
 	@Captor
 	ArgumentCaptor<String> nameCriteriaCaptor;
@@ -77,6 +81,7 @@ class OwnerControllerTest {
 		
 		// Given
 		final String criteria = "%" + ownerArg.getLastName() + "%";
+		InOrder inOrder = inOrder(this.ownerService, this.model);
 		
 		given(ownerService.findAllByLastNameLike(nameCriteriaCaptor.capture()))
 				.willAnswer(invocation -> {
@@ -96,14 +101,17 @@ class OwnerControllerTest {
 							"Invalid argument: '%s'", criteriaArg));
 				});
 		
-		Model model = mock(Model.class);
-		
 		// When
 		String actualViewName = controller.processFindForm(
-				ownerArg, bindingResult, model);
+				ownerArg, bindingResult, this.model);
 		
 		// Then
-		then(ownerService).should(times(1)).findAllByLastNameLike(eq(criteria));
+		then(ownerService).should(inOrder, times(1))
+				.findAllByLastNameLike(eq(criteria));
+		
+//		then(this.model).should(inOrder, times(1))
+//				.addAttribute("selections", this.bindingResult);
+		
 		assertThat(nameCriteriaCaptor.getValue())
 				.as("The criteria of findAllByLastNameLike should be '%s'", criteria)
 				.isEqualTo(criteria);
