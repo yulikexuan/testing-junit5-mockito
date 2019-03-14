@@ -45,9 +45,10 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.deleteById(1L);
 
 		// Then
-		then(this.specialtyRepository).should(times(2))
+		then(this.specialtyRepository).should(timeout(100).times(2))
 				.deleteById(id);
-		then(this.specialtyRepository).should(atLeastOnce()).deleteById(id);
+		then(this.specialtyRepository).should(timeout(100).atLeastOnce())
+				.deleteById(id);
 		then(this.specialtyRepository).should(atMost(5))
 				.deleteById(id);
 	}
@@ -64,7 +65,8 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.deleteById(1L);
 
 		// Then
-		then(this.specialtyRepository).should(atLeastOnce()).deleteById(eq(id));
+		then(this.specialtyRepository).should(timeout(100).atLeastOnce())
+				.deleteById(eq(id));
 	}
 
 	@DisplayName("Should be able to delete by id at most five times -")
@@ -88,8 +90,6 @@ class SpecialitySDJpaServiceTest {
 	void testDeleteByIdNever() {
 
 		// Given
-		long id = 1L;
-
 		// When
 		this.specialitySDJpaService.deleteById(1L);
 		this.specialitySDJpaService.deleteById(1L);
@@ -106,7 +106,7 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.delete(new Speciality());
 	}
 
-	@DisplayName("Able to delete a Speciality - ")
+	@DisplayName("Delete a Speciality - ")
 	@Test
 	void testDeleteByObject() {
 
@@ -116,10 +116,11 @@ class SpecialitySDJpaServiceTest {
 		this.specialitySDJpaService.delete(this.speciality);
 
 		// Then
-		then(this.specialtyRepository).should().delete(same(this.speciality));
+		then(this.specialtyRepository).should(timeout(100))
+				.delete(same(this.speciality));
 	}
 
-	@DisplayName("Able to find a Speciality by it's id - ")
+	@DisplayName("Find a Speciality by it's id - ")
 	@Test
 	void testFindById() {
 
@@ -134,10 +135,10 @@ class SpecialitySDJpaServiceTest {
 
 		// Then
 		assertThat(actualSpeciality).isSameAs(speciality);
-		then(this.specialtyRepository).should().findById(eq(id));
+		then(this.specialtyRepository).should(timeout(100)).findById(eq(id));
 	}
 
-	@DisplayName("BDD: Able to find a Speciality by it's id - ")
+	@DisplayName("BDD: Find a Speciality by it's id - ")
 	@Test
 	void testBDDFindById() {
 
@@ -152,7 +153,7 @@ class SpecialitySDJpaServiceTest {
 
 		// Then
 		assertThat(actualSpeciality).isSameAs(speciality);
-		then(this.specialtyRepository).should(times(1))
+		then(this.specialtyRepository).should(timeout(100).times(1))
 				.findById(id);
 		then(this.specialtyRepository).shouldHaveNoMoreInteractions();
 	}
@@ -172,7 +173,8 @@ class SpecialitySDJpaServiceTest {
 				.hasMessage("Boom");
 		
 		// Then
-		then(this.specialtyRepository).should(times(1)).findById(eq(1L));
+		then(this.specialtyRepository).should(timeout(100).times(1))
+				.findById(eq(1L));
 	}
 	
 	@DisplayName("Void return type method can throw Exception - ")
@@ -191,7 +193,7 @@ class SpecialitySDJpaServiceTest {
 		
 		// Then
 		then(this.specialtyRepository)
-				.should(times(1))
+				.should(timeout(100).times(1))
 				.delete(same(this.speciality));
 	}
 	
@@ -217,7 +219,8 @@ class SpecialitySDJpaServiceTest {
 		// Then
 		assertThat(actualSpeciality.getId()).isEqualTo(1L);
 
-		then(this.specialtyRepository).should(times(1)).save(same(speciality));
+		then(this.specialtyRepository).should(timeout(100).times(1))
+				.save(same(speciality));
 	}
 	
 	@DisplayName("Verify mock return null with Lambda Arg Matcher - ")
@@ -242,7 +245,8 @@ class SpecialitySDJpaServiceTest {
 		// Then
 		assertThat(actualSpeciality).isNull();
 
-		then(this.specialtyRepository).should().save(same(speciality));
+		then(this.specialtyRepository).should(timeout(100))
+				.save(same(speciality));
 	}
 	
 }///:~
