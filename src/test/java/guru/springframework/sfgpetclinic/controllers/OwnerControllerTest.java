@@ -139,6 +139,8 @@ class OwnerControllerTest {
 			assertThat(viewName).as("Should return creation form view")
 					.isEqualTo(OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM);
 			then(ownerService).should(never()).save(any(Owner.class));
+			verifyNoMoreInteractions(ownerService);
+			verifyZeroInteractions(model);
 		}
 		
 		@DisplayName("Should return owner view if binding result has no error - ")
@@ -159,6 +161,8 @@ class OwnerControllerTest {
 			assertThat(actualViewName).as("Should return %s", expectedViewName)
 					.isEqualTo(expectedViewName);
 			then(ownerService).should().save(same(owner));
+			verifyNoMoreInteractions(ownerService);
+			verifyZeroInteractions(model);
 		}
 		
 	}//:End of CreationFormProcessTest
